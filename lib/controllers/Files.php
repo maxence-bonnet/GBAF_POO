@@ -2,7 +2,7 @@
 
 namespace Controllers;
 
-class Files
+class Files extends Controller
 {
 
 }

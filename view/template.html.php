@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
     <head>
-    	<title><?= $title ?></title>
+    	<title><?= $pageTitle ?></title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
-        <link href="public/css/style.css" rel="stylesheet" />
-        <link rel="icon" type="image/png" href="public/images/logos/gbaf_ico.png" />
+        <link href="./public/css/style.css" rel="stylesheet" />
+        <link rel="icon" type="image/png" href="./public/images/logos/gbaf_ico.png" />
     </head>       
     <body>
     	<!-- HEADER -->
 
     	<div class="header_content">
 			<div class="logo_gbaf">
-				<a href="index.php?action=accueil"><img src="public/images/logos/gbaf.png" title="GBAF"alt="GBAF logo"/></a>
+				<a href="index.php?action=accueil"><img src="./public/images/logos/gbaf.png" title="GBAF"alt="GBAF logo"/></a>
 			</div>
 			<?php
 				if(isset($_SESSION['username']) AND !empty($_SESSION['username'])) // session active

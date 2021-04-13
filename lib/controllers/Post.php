@@ -2,9 +2,9 @@
 
 namespace Controllers;
 
-class Post
+class Post extends Controller
 {
-    
+    protected $modelName = \Models\Post::class;
 }
 
 function addComment($actor_id,$username,$comment)

@@ -2,193 +2,235 @@
 
 namespace Controllers;
 
-class Account 
+class Account extends Controller
 {
-    
-}
+	protected $modelName = \Models\Account::class;
 
-function inscription($post) // Inscription
-{
-	if(!empty($post['last_name']) AND
-	 !empty($post['first_name']) AND 
-	 !empty($post['username']) AND 
-	 !empty($post['pass1']) AND 
-	 !empty($post['pass2']) AND 
-	 !empty($post['question']) AND 
-	 !empty($post['answer'])) // Tous les champs sont remplis
+	public function testRegistration($last_name,$first_name,$username,$pass1,$pass2,$question,$answer)
 	{
-		foreach($post as $value => $key) // htmlspecialchars pour tout le monde
+		$existing = existUsername($username);
+		
+		if($existing)
 		{
-			$post[$value] = htmlspecialchars($_POST[$value]);
+			$error[] = 'exist';
 		}
-		$work = testRegistration($post['last_name'],$post['first_name'],$post['username'],$post['pass1'],$post['pass2'],$post['question'],$post['answer']);
-		if($work)
+			if(strlen($username) < 3)
 		{
-			$work = registerUser($post['last_name'],$post['first_name'],$post['username'],$post['pass1'],$post['question'],$post['answer']);
-			if(!$work)
-			{
-				$_SESSION['unknown_error'] = 1 ;
-			}
-			else
-			{
-				$_SESSION['success'] = 1 ;
-				header('Location: index.php?action=accueil');
-			}			
+			// username trop court
+			$error[] = 'short';
 		}
-	}
-	else
-	{
-		$_SESSION['missing_field'] = 1 ;
-	}
-	require('view/inscriptionView.php');
-}
+		if(!preg_match("#(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\d)(?=.*[^A-Za-z\d])#",$pass1) OR strlen($pass1) < 8)
+		{
+			// format mot de passe invalide
+			$error[] = 'invalidpass';
+		}
+		if($pass1 != $pass2)
+		{
+			// les mots de passe ne correspondent pas
+			$error[] = 'passnotmatching';
+		}
 
-function profileUpdatePassword($username,$actual_pass,$pass1,$pass2) // changement mot de passe via page de profil
-{
-	$testpass = testPassword($username,$actual_pass);
-	if($testpass)
-	{
-		$test = testReinitPass($pass1,$pass2);
-		if($test) // écriture
-		{			
-			$work = reinitPass($username,$pass1);
-			if(!$work)
+		if(isset($error))
+		{
+			foreach($error as $value => $key)
 			{
-				$_SESSION['unknown'] = 1 ;// erreur dans l'écriture
+				$_SESSION[$key] = 1;
 			}
-			else
-			{
-				$_SESSION['passchanged'] = 1 ; // écriture effectuée						
-			}
+			$work = false;
 		}
 		else
 		{
-			$_SESSION['invalidpass'] = 1 ;// mauvais format mdp
+			$work = true;
 		}
+		return $work;
 	}
-	else
+	
+	public function inscription($post) // Inscription
 	{
-		$_SESSION['wrongpass'] = 1 ; // mauvais mdp
-	}
-}
-
-function reinit($step) // Gestion de la réinitialisation du mot de passe via question secrète
-{
-	if($step == 1)
-	{
-		$content = getReinitContent(1);
-		require('view/reinitView.php');
-	}
-	elseif($step == 3)
-	{
-		if(isset($_POST['answer']) AND isset($_POST['pass1']) AND isset($_POST['pass2']) AND isset($_SESSION['usertemp']))
+		if(!empty($post['last_name']) AND
+		!empty($post['first_name']) AND 
+		!empty($post['username']) AND 
+		!empty($post['pass1']) AND 
+		!empty($post['pass2']) AND 
+		!empty($post['question']) AND 
+		!empty($post['answer'])) // Tous les champs sont remplis
 		{
-			$username = $_SESSION['usertemp'];
-			$answer = htmlspecialchars($_POST['answer']);		
-			$test = testReinitAns($username,$answer);
-			if(!$test)
+			foreach($post as $value => $key) // htmlspecialchars pour tout le monde
 			{
-				$_SESSION['invalid_answer'] = 1 ;
-				header('Location: index.php?action=reinit&fgt=2');
-				// mauvaise réponse à la question secrète
+				$post[$value] = htmlspecialchars($_POST[$value]);
 			}
-			else
+			$work = testRegistration($post['last_name'],$post['first_name'],$post['username'],$post['pass1'],$post['pass2'],$post['question'],$post['answer']);
+			if($work)
 			{
-				$pass1 = htmlspecialchars($_POST['pass1']);
-				$pass2 = htmlspecialchars($_POST['pass2']);
-				$test = testReinitPass($pass1,$pass2);
-				if(!$test)
+				$work = registerUser($post['last_name'],$post['first_name'],$post['username'],$post['pass1'],$post['question'],$post['answer']);
+				if(!$work)
 				{
-					$_SESSION['invalid_pass_format'] = 1 ;
-					header('Location: index.php?action=reinit&fgt=2');
-					// mauvais format de mot de passe (mais bonne réponse)
+					$_SESSION['unknown_error'] = 1 ;
 				}
 				else
 				{
-					$work = reinitPass($username,$pass1);
-					if(!$work)
-					{
-						$_SESSION['update_error'] = 1 ;
-						header('Location: index.php?action=reinit&fgt=2');
-						// erreur pendant l'écriture
-					}
-					else
-					{
-						unset($_SESSION['usertemp']);
-						$_SESSION['passchanged'] = 1 ;
-						header('Location: index.php?action=connexion');
-						// succès dans la réinitialisation -> retour à la page de connexion
-					}
-				}
+					$_SESSION['success'] = 1 ;
+					header('Location: index.php?action=accueil');
+				}			
 			}
 		}
 		else
 		{
 			$_SESSION['missing_field'] = 1 ;
-			header('Location: index.php?action=reinit&amp;fgt=2');
-			// manque certains champs
 		}
+		require('view/inscriptionView.php');
 	}
-	elseif($step == 2 AND isset($_POST['username']) OR isset($_SESSION['usertemp']))
+
+	public function profileUpdatePassword($username,$actual_pass,$pass1,$pass2) // changement mot de passe via page de profil
 	{
-		if(isset($_POST['username']))
+		$testpass = testPassword($username,$actual_pass);
+		if($testpass)
 		{
-			$username = htmlspecialchars($_POST['username']);	
-		}
-		else // cas où il y a eu un précédent retour d'erreur
-		{
-			$username = htmlspecialchars($_SESSION['usertemp']);
-		}
-
-		$existing = existUsername($username);
-
-		if(!$existing)
-		{
-			$_SESSION['invalid_user'] = 1 ;
-			header('Location: index.php?action=reinit&amp;fgt=1');
-			// utilisateur inexistant
+			$test = testReinitPass($pass1,$pass2);
+			if($test) // écriture
+			{			
+				$work = reinitPass($username,$pass1);
+				if(!$work)
+				{
+					$_SESSION['unknown'] = 1 ;// erreur dans l'écriture
+				}
+				else
+				{
+					$_SESSION['passchanged'] = 1 ; // écriture effectuée						
+				}
+			}
+			else
+			{
+				$_SESSION['invalidpass'] = 1 ;// mauvais format mdp
+			}
 		}
 		else
 		{
-			$_SESSION['usertemp'] = $username;
-			$question = getQuestion($username);
-			$content = getReinitContent(2,$question);
+			$_SESSION['wrongpass'] = 1 ; // mauvais mdp
+		}
+	}
+
+	public function reinit($step) // Gestion de la réinitialisation du mot de passe via question secrète
+	{
+		if($step == 1)
+		{
+			$content = getReinitContent(1);
 			require('view/reinitView.php');
-		}			
-	}		
-	else
+		}
+		elseif($step == 3)
+		{
+			if(isset($_POST['answer']) AND isset($_POST['pass1']) AND isset($_POST['pass2']) AND isset($_SESSION['usertemp']))
+			{
+				$username = $_SESSION['usertemp'];
+				$answer = htmlspecialchars($_POST['answer']);		
+				$test = testReinitAns($username,$answer);
+				if(!$test)
+				{
+					$_SESSION['invalid_answer'] = 1 ;
+					header('Location: index.php?action=reinit&fgt=2');
+					// mauvaise réponse à la question secrète
+				}
+				else
+				{
+					$pass1 = htmlspecialchars($_POST['pass1']);
+					$pass2 = htmlspecialchars($_POST['pass2']);
+					$test = testReinitPass($pass1,$pass2);
+					if(!$test)
+					{
+						$_SESSION['invalid_pass_format'] = 1 ;
+						header('Location: index.php?action=reinit&fgt=2');
+						// mauvais format de mot de passe (mais bonne réponse)
+					}
+					else
+					{
+						$work = reinitPass($username,$pass1);
+						if(!$work)
+						{
+							$_SESSION['update_error'] = 1 ;
+							header('Location: index.php?action=reinit&fgt=2');
+							// erreur pendant l'écriture
+						}
+						else
+						{
+							unset($_SESSION['usertemp']);
+							$_SESSION['passchanged'] = 1 ;
+							header('Location: index.php?action=connexion');
+							// succès dans la réinitialisation -> retour à la page de connexion
+						}
+					}
+				}
+			}
+			else
+			{
+				$_SESSION['missing_field'] = 1 ;
+				header('Location: index.php?action=reinit&amp;fgt=2');
+				// manque certains champs
+			}
+		}
+		elseif($step == 2 AND isset($_POST['username']) OR isset($_SESSION['usertemp']))
+		{
+			if(isset($_POST['username']))
+			{
+				$username = htmlspecialchars($_POST['username']);	
+			}
+			else // cas où il y a eu un précédent retour d'erreur
+			{
+				$username = htmlspecialchars($_SESSION['usertemp']);
+			}
+
+			$existing = existUsername($username);
+
+			if(!$existing)
+			{
+				$_SESSION['invalid_user'] = 1 ;
+				header('Location: index.php?action=reinit&amp;fgt=1');
+				// utilisateur inexistant
+			}
+			else
+			{
+				$_SESSION['usertemp'] = $username;
+				$question = getQuestion($username);
+				$content = getReinitContent(2,$question);
+				require('view/reinitView.php');
+			}			
+		}		
+		else
+		{
+			$step = 1;
+			require('view/reinitView.php');
+		}
+	}
+
+	public function profileUpdateUsername($new_username)// changement d'identifiant
 	{
-		$step = 1;
-		require('view/reinitView.php');
+		$new_username = htmlspecialchars($new_username);
+		$work = updateUsername($new_username);
+		if(!$work)
+		{
+			$_SESSION['exist'] = 1 ;// erreur dans l'écriture
+		}
+		else
+		{
+			$_SESSION['username'] = $new_username;
+			$_SESSION['usernamechanged'] = 1 ; // écriture effectuée						
+		}
+	}
+
+	public function delPhoto($username) // Supprime la photo précédente (sauf si c'est celle par défaut)
+	{
+		$db = dbConnect();
+		$result = $db->prepare('SELECT photo FROM account WHERE username = :username');
+		$result->execute(array('username' => $username));
+		$data = $result->fetch();
+		$result->closeCursor();
+		$actual_filename = htmlspecialchars($data['photo']);
+		echo $actual_filename ;
+		if($actual_filename != 'default.png')
+		{
+			unlink(realpath('C:/xampp/htdocs/GBAF_MVC/public/images/uploads/' . $actual_filename));
+		}
 	}
 }
 
-function profileUpdateUsername($new_username)// changement d'identifiant
-{
-	$new_username = htmlspecialchars($new_username);
-	$work = updateUsername($new_username);
-	if(!$work)
-	{
-		$_SESSION['exist'] = 1 ;// erreur dans l'écriture
-	}
-	else
-	{
-		$_SESSION['username'] = $new_username;
-		$_SESSION['usernamechanged'] = 1 ; // écriture effectuée						
-	}
-}
 
-function delPhoto($username) // Supprime la photo précédente (sauf si c'est celle par défaut)
-{
-	$db = dbConnect();
-	$result = $db->prepare('SELECT photo FROM account WHERE username = :username');
-	$result->execute(array('username' => $username));
-	$data = $result->fetch();
-	$result->closeCursor();
-	$actual_filename = htmlspecialchars($data['photo']);
-	echo $actual_filename ;
-	if($actual_filename != 'default.png')
-	{
-		unlink(realpath('C:/xampp/htdocs/GBAF_MVC/public/images/uploads/' . $actual_filename));
-	}
-}
+

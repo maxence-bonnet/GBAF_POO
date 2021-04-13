@@ -1,5 +1,3 @@
-<?php $title = 'Accueil'; ?>
-
 <div class="content accueil_content">
 	<div class="presentation_section">
 		<h1>Groupement Banque-Assurance Français</h1>
@@ -24,7 +22,7 @@
 		</div>
 					
 		<?php // Récupération des infos et extraits de tous les partenaires
-			while($actor = $actors_info->fetch())
+			foreach($actors_info as $actor)
 			{
 				$content = htmlspecialchars($actor['description']);
 				$extract = explode(" ",$content);
@@ -45,7 +43,6 @@
 				    </div>
 				<?php
 			}
-			$actors_info->closeCursor();
 		?>
 	</div>
 </div>

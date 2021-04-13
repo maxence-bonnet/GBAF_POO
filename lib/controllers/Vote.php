@@ -2,9 +2,9 @@
 
 namespace Controllers;
 
-class Vote
+class Vote extends Controller
 {
-    
+    protected $modelName = \Models\Vote::class;
 }
 
 function likeManage($actor_id,$username,$like_request)
