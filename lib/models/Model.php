@@ -33,7 +33,7 @@ abstract class Model
 	{
 		$result = $this->db->prepare("SELECT * FROM {$this->table} WHERE id_{$this->table} = :id");
 		$result->execute(['id' => $id]);
-		$item = $q->fetch();
+		$item = $result->fetch();
 		return $item ;
 	}
 

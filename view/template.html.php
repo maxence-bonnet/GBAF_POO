@@ -12,7 +12,7 @@
 
     	<div class="header_content">
 			<div class="logo_gbaf">
-				<a href="index.php?action=accueil"><img src="./public/images/logos/gbaf.png" title="GBAF"alt="GBAF logo"/></a>
+				<a href="index.php"><img src="./public/images/logos/gbaf.png" title="GBAF"alt="GBAF logo"/></a>
 			</div>
 			<?php
 				if(isset($_SESSION['username']) AND !empty($_SESSION['username'])) // session active
@@ -48,7 +48,7 @@
         <!-- FOOTER -->
 
         <div class="footer_content">
-        	<p><a href="index.php?action=mentions-legales"> Mentions légales </a> | <a href="index.php?action=contact">Contact</a></p>
+        	<p><a href="index.php?controller=mentions&task=mentions"> Mentions légales </a> | <a href="index.php?controller=contact&task=contact">Contact</a></p>
         </div>
 
     </body>

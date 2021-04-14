@@ -6,7 +6,7 @@ class Post extends Model
 {
     protected $table = "post";
 
-    public function existUserComment($actor_id,$username) // vérifie l'existance d'un commentaire de l'utilisateur connecté pour un acteur 
+    public function existUserComment(int $actor_id,$username) // vérifie l'existance d'un commentaire de l'utilisateur connecté pour un acteur 
     {
         $result = $this->db->prepare('SELECT account.id_user, username, post.id_user, id_actor
                                 FROM account
@@ -36,7 +36,7 @@ class Post extends Model
         }
     }
 
-    public function listComments($actor_id) // Dresse la liste des commentaires et leurs infos utilisateurs pour un acteur donné
+    public function listComments(int $actor_id) // Dresse la liste des commentaires et les infos utilisateurs liées pour un acteur donné
     {
         $comments = $this->db->prepare('SELECT account.id_user, nom, prenom, photo, post.id_user, id_actor, date_add, post 
                                 FROM post

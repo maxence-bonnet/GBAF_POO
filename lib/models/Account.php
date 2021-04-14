@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Account extends Models
+class Account extends Model
 {
     protected $table = "account";
 

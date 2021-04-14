@@ -1,7 +1,8 @@
 <?php
 require_once('lib/autoload.php');
-$test = new \Controllers\Actor();
-$test->accueil();
+
+\Application::process();
+
 
 // class Application
 // {

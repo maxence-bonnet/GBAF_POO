@@ -1,7 +1,3 @@
-<?php $title = $actorname;
-
-?>
-
 <div class ="content actor_content">
 	<div class="actor_full">
     	<div class="actor_full_logo">
@@ -20,39 +16,39 @@
 			if(!$existingUserComment)// pas encore de commentaire de l'utilisateur pour cet acteur -> on propose l'ajout de commentaire
 			{ 
 				?>
-					<a href="index.php?action=acteur&amp;act=<?= $actor_id; ?>&amp;add=1#new_comment">Ajouter un commentaire public</a>
+					<a href="index.php?action=acteur&amp;act=<?= $actorId; ?>&amp;add=1#new_comment">Ajouter un commentaire public</a>
 				<?php
 			}
 			else // déjà commenté cet acteur -> Mention + lien pour supprimer le commentaire existant
 			{
 				?>
-					<div class="case_commented"><div class="case_commented_sub"><p>Vous avez commenté ce partenaire</p><p class="splitter"> | </p><a href="index.php?action=comment&amp;act=<?= $actor_id; ?>&amp;delete=1">Supprimer mon commentaire</a></div></div>
+					<div class="case_commented"><div class="case_commented_sub"><p>Vous avez commenté ce partenaire</p><p class="splitter"> | </p><a href="index.php?action=comment&amp;act=<?= $actorId; ?>&amp;delete=1">Supprimer mon commentaire</a></div></div>
 				<?php
 			}
 		?>
 		<div class="actor_like">
 			<div class="actor_like_sub">
-    			<a href="index.php?action=acteur&amp;act=<?= $actor_id ?>&amp;like=1" title="<?php 
-    			if(!empty($like_list))
+    			<a href="index.php?action=acteur&amp;act=<?= $actorId ?>&amp;like=1" title="<?php 
+    			if(!empty($likersList))
     			{
-	    			foreach($like_list as $name)
+	    			foreach($likersList as $name)
 	    			{
 	    				echo $name . '&#013;';
 	    			}					    				
     			}	
     			?>">
-    				<?= '(' . $like_number . ') ' ?>Je recommande <img src="public/images/logos/like.png" class="like_button" alt="like_button"/></a>
+    				<?= '(' . $likeNumber . ') ' ?>Je recommande <img src="public/images/logos/like.png" class="like_button" alt="like_button"/></a>
     			<p class="splitter"> | </p> 
-    			<a href="index.php?action=acteur&amp;act=<?= $actor_id ?>&amp;like=2" title="<?php
-    			if(!empty($dislike_list))
+    			<a href="index.php?action=acteur&amp;act=<?= $actorId ?>&amp;like=2" title="<?php
+    			if(!empty($dislikersList))
     			{
-	    			foreach($dislike_list as $name)
+	    			foreach($dislikersList as $name)
 	    			{
 	    				echo $name . '&#013;';
 	    			}					    				
     			}			    			
     			?>">
-    				<?= '(' . $dislike_number . ') ' ?>Je déconseille<img src="public/images/logos/dislike.png" class="dislike_button" alt="dislike_button"/></a>
+    				<?= '(' . $dislikeNumber . ') ' ?>Je déconseille<img src="public/images/logos/dislike.png" class="dislike_button" alt="dislike_button"/></a>
 			</div>
 		</div>
 
@@ -64,7 +60,7 @@
 						<div class="actor_like_mention_sub">
 							<p><?= $show ?></p>
 							<p class="splitter"> |  </p>
-							<a href="index.php?action=acteur&amp;act=<?= $actor_id ?>&amp;like=3">Réinitialiser</a>
+							<a href="index.php?action=acteur&amp;act=<?= $actorId ?>&amp;like=3">Réinitialiser</a>
 						</div>
 					</div>
 				<?php
@@ -101,7 +97,7 @@
 				$com_photo = htmlspecialchars($comment['photo']);
 				?>
 				<div class="post">
-					<div class="post_photo"><img src="public/images/uploads/<?= $com_photo ; ?>" alt="photo"/></div>
+					<div class="post_photo"><img src="./public/images/uploads/<?= $com_photo ; ?>" alt="photo"/></div>
 					<p class="user_post_ref"><?= $com_date; ?>, <?= $com_prenom; ?> <?= $com_nom; ?> a commenté :</p>
 					<p><?= nl2br($com_post); ?></p>
 				</div>
@@ -117,10 +113,10 @@
 	</div>
 
 	<?php
-	if($showform)
+	if($showForm)
 	{
 		?>
-		<form class="add_comment" action="index.php?action=comment&amp;act=<?= $actor_id; ?>&amp;add=1" method="post">
+		<form class="add_comment" action="index.php?action=comment&amp;act=<?= $actorId; ?>&amp;add=1" method="post">
 			<label for="new_comment">Votre commentaire : </label><textarea name="new_comment" id="new_comment"></textarea>
 			<input type="submit" name="new_comment_submit" value="Publier"/>
 		</form>
