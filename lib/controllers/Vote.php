@@ -5,59 +5,52 @@ namespace Controllers;
 class Vote extends Controller
 {
     protected $modelName = \Models\Vote::class;
-}
 
-function likeManage($actor_id,$username,$like_request)
-{
-	$existingActor = existActor($actor_id);
-	if(!$existingActor)
+	public function likeManage()
 	{
-		header('Location: index.php?action=accueil');
+		$voteCallArray = [1,2,3];
+
+		$actorModel = new \Models\Actor();
+
+		$actor = $actorModel->find($_GET['id']);
+
+		if (empty($_GET['id']) || empty($_GET['vote']) || !in_array($_GET['vote'],$voteCallArray) || !$actor) {
+			// si éléments $_GET vides ou incorrects / acteur inexistant dans base de données
+			\Http::redirect('index.php');
+		}
+
+		$voteRequest = $_GET['vote'];
+
+		$actorId = $actor['id_actor'];
+
+		$userModel = new \Models\Account();
+
+		$userId = $userModel->getUserId('Jean');
+
+		$voteCurrent = $this->model->checkVote($actorId,$userId);
+
+		if (!$voteCurrent) {
+			if ($voteRequest == 1 || $voteRequest == 2) { // pas encore de like / dislike pour l'utilisateur actuel
+				if ($voteRequest == 1) {
+					$voteRequest = 'like';
+				}
+				elseif ($voteRequest == 2) {
+					$voteRequest = 'dislike';
+				}
+				$this->model->addVote($actorId,$userId,$voteRequest);
+			}
+		}
+		elseif ($voteCurrent && $voteRequest == 3) {
+				// Supprimer la mention like ou dislike
+				$this->model->deleteVote($actorId,$userId);
+		}
+		elseif (($voteRequest == 1 && $voteCurrent = 'dislike') || ($voteRequest == 2 && $voteCurrent = 'like')) {
+			// mise à jour de la mention (permutation)
+			$this->model->updateVote($actorId,$userId,$voteRequest);
+		}
+		\Http::redirect('index.php?controller=acteur&task=acteur&id=' . $actorId);
 	}
 	
-	$user = getUserId($username);
-	$user_id = $user;
-	$like_state = checkLike($actor_id,$username);
-	if(!$like_state)
-	{
-		if($like_request == 1)
-		{
-			$like_request = 'like';
-			$work = addMention($actor_id,$user_id,$like_request);
-		}
-		elseif($like_request == 2)
-		{
-			$like_request = 'dislike';
-			$work = addMention($actor_id,$user_id,$like_request);
-		}
-
-		if(!$work)
-		{
-			echo 'Erreur pendant l\'ajout';
-		}		
-	}
-	else
-	{
-		if($like_state == 'like' AND $like_request == 2)
-		{
-			// Upate de like à dislike
-			$work = updateMention($actor_id,$user_id,$like_request);
-		}
-		elseif($like_state == 'dislike' AND $like_request == 1)
-		{
-			// Update de dislike à like
-			$work = updateMention($actor_id,$user_id,$like_request);
-		}
-		elseif($like_request == 3)
-		{
-			// Supprimer la mention like ou dislike
-			$work = deleteMention($actor_id,$user_id);
-		}
-
-		if(!$work) 
-		{
-			echo ' /!\ Erreur pendant la mise à jour de la mention /!\ ';
-		}		
-	}
-	header('Location: index.php?action=acteur&act=' . $actor_id);
 }
+
+

@@ -6,32 +6,24 @@ class Vote extends Model
 {
     protected $table = "vote";
 
-    public function checkLike($actor_id,$username) // vérifie si l'utilisateur actuel a déjà ajouté une mention ("je recommande / déconseille")
+    public function checkVote($actorId,$userId) // vérifie si l'utilisateur actuel a déjà ajouté une mention ("je recommande / déconseille")
     {
-        $result = $this->db->prepare('SELECT account.id_user, username, vote.id_user, id_actor, vote 
-                                FROM account
-                                INNER JOIN vote
-                                ON account.id_user = vote.id_user
-                                WHERE username = :username
-                                AND id_actor = :actor');
-        $result->execute(array('username' => $username, 'actor' => $actor_id));
+        $result = $this->db->prepare('SELECT * FROM vote WHERE id_user = :userId AND id_actor = :actorId');
+        $result->execute(array('userId' => $userId, 'actorId' => $actorId));
         $data = $result->fetch();
-        $result->closeCursor();
-        if(!$data)
-        {
-            $like_state = false;
+        if (!$data) {
+            $voteCurrent = false;
         }
-        else
-        {
-            $like_state = $data['vote'];
+        else {
+            $voteCurrent = $data['vote'];
         }
-        return $like_state;
+        return $voteCurrent;
     }
 
-    public function countLikes($actor_id,$like_state) // Compteur de mention "je recommande" / "Je déconseille" (en fonction de $likestate)
+    public function countLikes($actorId,$like_state) // Compteur de mention "je recommande" / "Je déconseille" (en fonction de $likestate)
     {
          $result = $this->db->prepare('SELECT COUNT(*) AS like_number FROM vote WHERE id_actor = :actor AND vote = :like_');
-        $result->execute(array('actor' => $actor_id, 'like_' => $like_state));
+        $result->execute(array('actor' => $actorId, 'like_' => $like_state));
         $data = $result->fetch();
         $result->closeCursor();
         $like_number = $data['like_number'];
@@ -42,7 +34,7 @@ class Vote extends Model
         return $like_number;
     }
 
-    public function listLikers($actor_id,$like_state) // Dresse la liste des utilisateurs qui recommandent ou déconseillent (en fonction de $likestate) l'acteur donné
+    public function listLikers($actorId,$like_state) // Dresse la liste des utilisateurs qui recommandent ou déconseillent (en fonction de $likestate) l'acteur donné
     {
           $result = $this->db->prepare('SELECT account.id_user, nom, prenom, vote.id_user, id_actor, vote 
                                 FROM vote
@@ -50,7 +42,7 @@ class Vote extends Model
                                 ON account.id_user = vote.id_user
                                 WHERE id_actor = :actor
                                 AND vote = :like_');
-        $work = $result->execute(array('actor' => $actor_id, 'like_' => $like_state));
+        $work = $result->execute(array('actor' => $actorId, 'like_' => $like_state));
         if(!$work)
         {
             $like_list[] = '';
@@ -67,28 +59,22 @@ class Vote extends Model
         return $like_list;
     }
 
-    public function addMention($actor_id,$user_id,$like_request) // Ajoute la mention (en fonction de $likestate)
+    public function addVote($actorId,$userId,$voteRequest) // Ajoute la mention (en fonction de $voteRequest)
     {
-        $query = $this->db->prepare('INSERT INTO vote(id_user, id_actor, vote) VALUES(:id_user, :actor, :vote)');
-        $work = $query->execute(array('id_user' => $user_id, 'actor' => $actor_id, 'vote' => $like_request));
-        $query->closeCursor();
-        return $work;
+        $query = $this->db->prepare('INSERT INTO vote(id_user, id_actor, vote) VALUES(:id_user, :actorId, :vote)');
+        $query->execute(array('id_user' => $userId, 'actorId' => $actorId, 'vote' => $voteRequest));
     }
 
-    public function updateMention($actor_id,$user_id,$like_request) // Met à jour la mention (en fonction de $likestate)
+    public function updateVote($actorId,$userId,$voteRequest) // Met à jour la mention (en fonction de $voteRequest)
     {
-        $query = $this->db->prepare('UPDATE vote SET vote = :vote WHERE id_user = :id_user AND id_actor = :actor');
-        $work = $query->execute(array('vote' => $like_request, 'id_user' => $user_id, 'actor' => $actor_id));
-        $query->closeCursor();
-        return $work;	
+        $query = $this->db->prepare('UPDATE vote SET vote = :vote WHERE id_user = :id_user AND id_actor = :actorId');
+        $query->execute(array('id_user' => $userId, 'actorId' => $actorId, 'vote' => $voteRequest));
     }
 
-    public function deleteMention($actor_id,$user_id) // Supprime la mention
+    public function deleteVote($actorId,$userId) // Supprime la mention
     {
-        $query = $this->db->prepare('DELETE FROM vote WHERE id_user = :id_user AND id_actor = :actor');
-        $work = $query->execute(array('id_user' => $user_id, 'actor' => $actor_id));
-        $query->closeCursor();	
-        return $work;
+        $query = $this->db->prepare('DELETE FROM vote WHERE id_user = :id_user AND id_actor = :actorId');
+        $query->execute(array('id_user' => $userId, 'actorId' => $actorId));
     }
 }
 

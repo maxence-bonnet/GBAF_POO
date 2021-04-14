@@ -46,7 +46,7 @@ class Actor extends Controller
         $comments = $commentModel->listComments($actorId);
             //infos concernant la personne connectée (si elle a déjà mis un commentaire)
             if($comments) {
-                $existingUserComment = $commentModel->existUserComment($actorId,'Jean');
+                $existingUserComment = $commentModel->existUserComment($actorId,'2');
             }
         
 
@@ -62,7 +62,7 @@ class Actor extends Controller
         $dislikersList = $voteModel->listLikers($actorId,'dislike');
 
             //infos concernant la personne connectée (si elle a déjà mis une mention)
-        $likeState = $voteModel->checkLike($actorId,'Jean');
+        $likeState = $voteModel->checkVote($actorId,'2');
 
         if ($likeState == 'like') {
             $show = 'Vous recommandez ce partenaire';

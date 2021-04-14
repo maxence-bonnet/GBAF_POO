@@ -28,7 +28,7 @@
 		?>
 		<div class="actor_like">
 			<div class="actor_like_sub">
-    			<a href="index.php?action=acteur&amp;act=<?= $actorId ?>&amp;like=1" title="<?php 
+    			<a href="index.php?controller=vote&amp;task=likeManage&amp;id=<?= $actorId ?>&amp;vote=1" title="<?php 
     			if(!empty($likersList))
     			{
 	    			foreach($likersList as $name)
@@ -39,7 +39,7 @@
     			?>">
     				<?= '(' . $likeNumber . ') ' ?>Je recommande <img src="public/images/logos/like.png" class="like_button" alt="like_button"/></a>
     			<p class="splitter"> | </p> 
-    			<a href="index.php?action=acteur&amp;act=<?= $actorId ?>&amp;like=2" title="<?php
+    			<a href="index.php?controller=vote&amp;task=likeManage&amp;id=<?= $actorId ?>&amp;vote=2" title="<?php
     			if(!empty($dislikersList))
     			{
 	    			foreach($dislikersList as $name)
@@ -60,7 +60,7 @@
 						<div class="actor_like_mention_sub">
 							<p><?= $show ?></p>
 							<p class="splitter"> |  </p>
-							<a href="index.php?action=acteur&amp;act=<?= $actorId ?>&amp;like=3">Réinitialiser</a>
+							<a href="index.php?controller=vote&amp;task=likeManage&amp;id=<?= $actorId ?>&amp;vote=3">Réinitialiser</a>
 						</div>
 					</div>
 				<?php

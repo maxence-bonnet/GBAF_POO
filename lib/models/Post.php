@@ -6,17 +6,11 @@ class Post extends Model
 {
     protected $table = "post";
 
-    public function existUserComment(int $actor_id,$username) // vérifie l'existance d'un commentaire de l'utilisateur connecté pour un acteur 
+    public function existUserComment(int $actorId,$userId) // vérifie l'existance d'un commentaire de l'utilisateur connecté pour un acteur 
     {
-        $result = $this->db->prepare('SELECT account.id_user, username, post.id_user, id_actor
-                                FROM account
-                                INNER JOIN post
-                                ON account.id_user = post.id_user
-                                WHERE username = :username
-                                AND id_actor = :actor');
-        $result->execute(array('username' => $username, 'actor' => $actor_id));
+        $result = $this->db->prepare('SELECT * FROM post WHERE id_user = :userId AND id_actor = :actorId');
+        $result->execute(array('userId' => $userId, 'actorId' => $actorId));
         $existingUserComment = $result->fetch();
-        $result->closeCursor();
         return $existingUserComment;
     }
 
