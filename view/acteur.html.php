@@ -13,26 +13,22 @@
 
 	<div class="actor_like_management">
 		<?php
-			if(!$existingUserComment)// pas encore de commentaire de l'utilisateur pour cet acteur -> on propose l'ajout de commentaire
-			{ 
+			if (!$existingUserComment) { // pas encore de commentaire de l'utilisateur pour cet acteur -> on propose l'ajout de commentaire
 				?>
-					<a href="index.php?action=acteur&amp;act=<?= $actorId; ?>&amp;add=1#new_comment">Ajouter un commentaire public</a>
+					<a href="index.php?controller=acteur&amp;task=acteur&amp;id=<?= $actorId ?>&amp;add=1#new_comment">Ajouter un commentaire public</a>
 				<?php
 			}
-			else // déjà commenté cet acteur -> Mention + lien pour supprimer le commentaire existant
-			{
+			else { // déjà commenté cet acteur -> Mention + lien pour supprimer le commentaire existant
 				?>
-					<div class="case_commented"><div class="case_commented_sub"><p>Vous avez commenté ce partenaire</p><p class="splitter"> | </p><a href="index.php?action=comment&amp;act=<?= $actorId; ?>&amp;delete=1">Supprimer mon commentaire</a></div></div>
+					<div class="case_commented"><div class="case_commented_sub"><p>Vous avez commenté ce partenaire</p><p class="splitter"> | </p><a href="index.php?controller=post&amp;task=delComment&amp;id=<?= $actorId ?>">Supprimer mon commentaire</a></div></div>
 				<?php
 			}
 		?>
 		<div class="actor_like">
 			<div class="actor_like_sub">
     			<a href="index.php?controller=vote&amp;task=likeManage&amp;id=<?= $actorId ?>&amp;vote=1" title="<?php 
-    			if(!empty($likersList))
-    			{
-	    			foreach($likersList as $name)
-	    			{
+    			if (!empty($likersList)) {
+	    			foreach ($likersList as $name) {
 	    				echo $name . '&#013;';
 	    			}					    				
     			}	
@@ -40,10 +36,8 @@
     				<?= '(' . $likeNumber . ') ' ?>Je recommande <img src="public/images/logos/like.png" class="like_button" alt="like_button"/></a>
     			<p class="splitter"> | </p> 
     			<a href="index.php?controller=vote&amp;task=likeManage&amp;id=<?= $actorId ?>&amp;vote=2" title="<?php
-    			if(!empty($dislikersList))
-    			{
-	    			foreach($dislikersList as $name)
-	    			{
+    			if (!empty($dislikersList)) {
+	    			foreach ($dislikersList as $name) {
 	    				echo $name . '&#013;';
 	    			}					    				
     			}			    			
@@ -69,27 +63,24 @@
 	</div>
 
 	<div class="post_section">
-		<h4>Commentaires :</h4>
-		<?php
-		if(isset($_SESSION['posted']))
-		{
-			    echo '<p style=color:red;>Votre commentaire a bien été ajouté.</p>';
-			    unset($_SESSION['posted']);
-		}
-		if(isset($_SESSION['deleted_post']))
-		{
-			    echo '<p style=color:red;>Votre commentaire a bien été supprimé.</p>';
-			    unset($_SESSION['deleted_post']);
-		}
-		if(isset($_SESSION['existing_comment']))
-		{
-			    echo '<p style=color:red;>Vous avez déjà commenté cet acteur, pour commenter à nouveau, supprimez votre précédent commentaire.</p>';
-			    unset($_SESSION['existing_comment']);
-		}
-		if($comments)
-		{										
-			while($comment = $comments->fetch())
-			{
+		
+	<h4>Commentaires :</h4>
+
+		<?php 
+		// if (isset($_SESSION['posted'])) {
+		// 	    echo '<p style=color:red;>Votre commentaire a bien été ajouté.</p>';
+		// 	    unset($_SESSION['posted']);
+		// }
+		// if (isset($_SESSION['deleted_post'])) {
+		// 	    echo '<p style=color:red;>Votre commentaire a bien été supprimé.</p>';
+		// 	    unset($_SESSION['deleted_post']);
+		// }
+		// if (isset($_SESSION['existing_comment'])) {
+		// 	    echo '<p style=color:red;>Vous avez déjà commenté cet acteur, pour commenter à nouveau, supprimez votre précédent commentaire.</p>';
+		// 	    unset($_SESSION['existing_comment']);
+		// }
+		if ($comments) {										
+			foreach ($comments as $comment) {
 				$com_nom = htmlspecialchars($comment['nom']);
 				$com_prenom = htmlspecialchars($comment['prenom']);
 				$com_date = preg_replace("#([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2})#","Le $3/$2/$1",$comment['date_add']);
@@ -103,7 +94,6 @@
 				</div>
 				<?php
 			}
-			$comments->closeCursor();
 		}
 		else
 		{
@@ -113,14 +103,10 @@
 	</div>
 
 	<?php
-	if($showForm)
-	{
-		?>
-		<form class="add_comment" action="index.php?action=comment&amp;act=<?= $actorId; ?>&amp;add=1" method="post">
+	if ($showForm) { ?>
+		<form class="add_comment" action="index.php?controller=post&amp;task=addComment&amp;id=<?= $actorId ?>" method="post">
 			<label for="new_comment">Votre commentaire : </label><textarea name="new_comment" id="new_comment"></textarea>
 			<input type="submit" name="new_comment_submit" value="Publier"/>
 		</form>
-		<?php
-	}	
-	?>
+	<?php } ?>
 </div>

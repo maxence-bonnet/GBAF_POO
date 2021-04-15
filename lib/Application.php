@@ -7,7 +7,7 @@ class Application
         $controllerName = "Actor";
         $task = "accueil";
         $controllersCallArray = ['accout','actor','connection','contact','files','mentions','post','vote'];      
-        $tasksCallArray = ['accueil','acteur','contact','mentions','likeManage'];
+        $tasksCallArray = ['accueil','acteur','contact','mentions','likeManage','addComment','delComment'];
 
         if (!empty($_GET['controller']) && in_array($_GET['controller'],$controllersCallArray)) {                     
             $controllerName = ucfirst($_GET['controller']);      

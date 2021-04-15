@@ -6,7 +6,7 @@ class Post extends Model
 {
     protected $table = "post";
 
-    public function existUserComment(int $actorId,$userId) // vérifie l'existance d'un commentaire de l'utilisateur connecté pour un acteur 
+    public function existUserComment(int $actorId,int $userId) // vérifie l'existance d'un commentaire de l'utilisateur connecté pour un acteur 
     {
         $result = $this->db->prepare('SELECT * FROM post WHERE id_user = :userId AND id_actor = :actorId');
         $result->execute(array('userId' => $userId, 'actorId' => $actorId));
@@ -14,47 +14,31 @@ class Post extends Model
         return $existingUserComment;
     }
 
-    public function existComment($actor_id) // vérifie l'existance d'au moins un commentaire pour l'acteur donné
+    public function listComments(int $actorId) // Dresse la liste des commentaires et les infos utilisateurs liées pour un acteur donné
     {
-        $result = $this->db->prepare('SELECT id_actor FROM post WHERE id_actor = :actor');
-        $result->execute(array('actor' => $actor_id));
-        $data = $result->fetch();
-        $result->closeCursor();	
-        if(!$data)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    public function listComments(int $actor_id) // Dresse la liste des commentaires et les infos utilisateurs liées pour un acteur donné
-    {
-        $comments = $this->db->prepare('SELECT account.id_user, nom, prenom, photo, post.id_user, id_actor, date_add, post 
+        $results = $this->db->prepare('SELECT account.id_user, nom, prenom, photo, post.id_user, id_actor, date_add, post 
                                 FROM post
                                 INNER JOIN account
                                 ON account.id_user = post.id_user
-                                WHERE id_actor = :actor
+                                WHERE id_actor = :actorId
                                 ORDER BY date_add');
-        $comments->execute(array('actor' => $actor_id));
+        $results->execute(array('actorId' => $actorId));
+        $comments = $results->fetchAll();
         return $comments;
     }
 
-    public function newComment($user_id,$actor_id,$comment) // ajoute un commentaire
+    public function addComment($userId,$actorId,$comment) // ajoute un commentaire
     {
         $query = $this->db->prepare('INSERT INTO post(id_user, id_actor, post) VALUES(:id_user, :id_actor, :comment)');
-        $work = $query->execute(array('id_user' => $user_id, 'id_actor' => $actor_id, 'comment' => $comment));
+        $work = $query->execute(array('id_user' => $userId, 'id_actor' => $actorId, 'comment' => $comment));
         $query->closeCursor();
         return $work;
     }
 
-    public function deleteComment($user_id,$actor_id) // supprime le commentaire existant
+    public function delComment($userId,$actorId) // supprime le commentaire existant
     {	
         $query = $this->db->prepare('DELETE FROM post WHERE id_user = :id_user AND id_actor = :id_actor');
-        $work = $query->execute(array('id_user' => $user_id, 'id_actor' => $actor_id));
-        $query->closeCursor();
+        $work = $query->execute(array('id_user' => $userId, 'id_actor' => $actorId));
         return $work;
     }
 }

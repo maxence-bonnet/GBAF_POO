@@ -22,21 +22,22 @@ class Actor extends Controller
         $existingUserComment = false;
         $show = false;
         $showForm = false;
+
+        // Vérification à globaliser à chaque fois qu'on aura besoin d'un id acteur
+        if (!isset($_GET['id']) || empty($_GET['id'])) {
+            \Http::redirect('index.php');
+        }
+       
+        $actorId = $_GET['id'];
+
+        //infos acteur
+        $actor = $this->model->find($actorId);           
+        if (!$actor) { // id acteur invalide : retour accueil           
+            \Http::redirect('index.php');
+        }
+
+        $userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
         
-        if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
-            $actorId = $_GET['id'];
-            //infos acteur
-            $actor = $this->model->find($actorId);           
-            if (!$actor) {
-                // id acteur invalide : retour accueil
-                \Http::redirect('index.php');
-            }
-        }
-
-        if (!$actorId) {
-            die("Pas de paramètre `id` dans l'URL !");
-        }
-
         //titre de page
         $pageTitle = $actor['actor'];
 
@@ -45,9 +46,9 @@ class Actor extends Controller
         
         $comments = $commentModel->listComments($actorId);
             //infos concernant la personne connectée (si elle a déjà mis un commentaire)
-            if($comments) {
-                $existingUserComment = $commentModel->existUserComment($actorId,'2');
-            }
+        if($comments) {
+            $existingUserComment = $commentModel->existUserComment($actorId,$userId);
+        }
         
 
         //infos Likes
@@ -62,12 +63,12 @@ class Actor extends Controller
         $dislikersList = $voteModel->listLikers($actorId,'dislike');
 
             //infos concernant la personne connectée (si elle a déjà mis une mention)
-        $likeState = $voteModel->checkVote($actorId,'2');
+        $voteCurrent = $voteModel->checkVote($actorId,$userId);
 
-        if ($likeState == 'like') {
+        if ($voteCurrent == 'like') {
             $show = 'Vous recommandez ce partenaire';
         }
-        elseif ($likeState == 'dislike') {
+        elseif ($voteCurrent == 'dislike') {
             $show = 'Vous déconseillez ce partenaire';	
         }
 
@@ -86,7 +87,6 @@ class Actor extends Controller
                                         'dislikeNumber',
                                         'likersList',
                                         'dislikersList',
-                                        'likeState',
                                         'show',
                                         'showForm'
         ));

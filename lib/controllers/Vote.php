@@ -25,7 +25,7 @@ class Vote extends Controller
 
 		$userModel = new \Models\Account();
 
-		$userId = $userModel->getUserId('Jean');
+		$userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
 
 		$voteCurrent = $this->model->checkVote($actorId,$userId);
 
