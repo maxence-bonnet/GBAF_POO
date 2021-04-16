@@ -9,10 +9,16 @@ class Actor extends Controller
     public function accueil()
     {
         $actorsInfo = $this->model->findAll();
+       
+        $userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+
+        $accountModel = new \Models\Account();
+
+        $accountInfo = $accountModel->find($userId);
 
         $pageTitle = "Accueil";
 
-        \Renderer::render('accueil', compact('pageTitle','actorsInfo'));
+        \Renderer::render('accueil', compact('pageTitle','actorsInfo','accountInfo'));
 
     }
 

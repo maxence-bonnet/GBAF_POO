@@ -19,10 +19,10 @@
 					?>
 					<div class="user_ref">
 						<div class="user_photo">
-							<a href="index.php?controller=account&amp;task=profil"><img src="public/images/uploads/Dujardin.jpg" alt="Ma photo de profil" title="Voir mon profil"/></a>
+							<a href="index.php?controller=account&amp;task=profil"><img src="public/images/uploads/<?= $accountInfo['photo'] ?>" alt="Ma photo de profil" title="Voir mon profil"/></a>
 						</div>
 						<div class="user_name">
-							<a href="index.php?controller=account&amp;task=profil" title="Voir mon profil"><p><?= 'Jean Dujardin' ?></p></a>
+							<a href="index.php?controller=account&amp;task=profil" title="Voir mon profil"><p><?= $accountInfo['prenom'] . ' ' . $accountInfo['nom'] ?></p></a>
 						</div>
 						<form class="deconnection_form" action="index.php?action=deconnexion" method="post"><input type="submit" value="deconnexion"/></form>				
 					</div>

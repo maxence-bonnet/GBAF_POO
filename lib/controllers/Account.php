@@ -15,7 +15,80 @@ class Account extends Controller
         $pageTitle = "Profil de " . $accountInfo['nom'] . ' ' . $accountInfo['nom'];
 
         \Renderer::render('profil', compact('pageTitle','accountInfo'));
-    }	
+	}
+
+	public function update()
+	{
+		$userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+
+		if (isset($_POST['username']) && !empty($_POST['username'])) {
+			if (preg_match("#^[a-z]{3,}$#i",$_POST['username'])) {
+				if (!$this->model->find($_POST['username'])) {
+					$this->model->updateUsername($_POST['username'],$userId);
+					$_SESSION['usernamechanged'] = 1 ; // username bien modifié
+				}
+				else {
+					$_SESSION['exist'] = 1; // ce username existe déjà
+				}
+			}
+			else {
+				$_SESSION['username_format'] = 1; // mauvais format
+			}
+		}
+
+		if (isset($_POST['actual_pass']) && !empty($_POST['actual_pass'])
+			 && isset($_POST['pass1']) && !empty($_POST['pass1'])
+			 && isset($_POST['pass2']) && !empty($_POST['pass2'])) {
+			
+			$currentPassword = $_POST['actual_pass'];
+			$newPassword1 = $_POST['pass1'];
+			$newPassword2 = $_POST['pass2'];
+
+			if(preg_match("#(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\d)(?=.*[^A-Za-z\d])#",$newPassword1) && $newPassword1 == $newPassword2 ) {
+				if($this->model->testPassword($userId,$currentPassword)) {
+					$newPassword1 = password_hash($newPassword1,PASSWORD_DEFAULT);
+					$this->model->updatePassword($userId,$newPassword1);
+					$_SESSION['passchanged'] = 1 ; // écriture effectuée
+				}
+				else {
+					$_SESSION['wrongpass'] = 1 ; // mauvais mdp
+				}
+			}
+			else {
+				$_SESSION['invalidpass'] = 1 ;// mauvais format
+			}	
+		}
+
+		if(is_uploaded_file($_FILES['photo']['tmp_name']))
+		{
+			$fileSize = $_FILES['photo']['size'];
+			$filePathInfo = pathinfo($_FILES['photo']['name']);
+			$fileExtension = $filePathInfo['extension'];
+
+			$filesModel = new \Controllers\Files();
+
+			if ($filesModel->testFile($fileExtension,$fileSize)) {
+
+				$userAccount = $this->model->find($userId);
+
+				$userCurrentPhotoName = $userAccount['photo'];
+
+				if ($userCurrentPhotoName != 'default.png') {
+					$filesModel->delPhoto($userCurrentPhotoName);
+				}
+
+				$newFileName = $filesModel->addPhoto($userId,$_FILES['photo'],$fileExtension);
+
+				$this->model->updatePhotoName($userId,$newFileName);
+			}
+			else {
+				$_SESSION['invalid_file'] = 1;
+			}
+
+		}	
+
+		\Http::redirect('index.php?controller=account&task=profil');
+	}
 
 	public function testRegistration($last_name,$first_name,$username,$pass1,$pass2,$question,$answer)
 	{
@@ -90,35 +163,6 @@ class Account extends Controller
 			$_SESSION['missing_field'] = 1 ;
 		}
 		require('view/inscriptionView.php');
-	}
-
-	public function profileUpdatePassword($username,$actual_pass,$pass1,$pass2) // changement mot de passe via page de profil
-	{
-		$testpass = testPassword($username,$actual_pass);
-		if($testpass)
-		{
-			$test = testReinitPass($pass1,$pass2);
-			if($test) // écriture
-			{			
-				$work = reinitPass($username,$pass1);
-				if(!$work)
-				{
-					$_SESSION['unknown'] = 1 ;// erreur dans l'écriture
-				}
-				else
-				{
-					$_SESSION['passchanged'] = 1 ; // écriture effectuée						
-				}
-			}
-			else
-			{
-				$_SESSION['invalidpass'] = 1 ;// mauvais format mdp
-			}
-		}
-		else
-		{
-			$_SESSION['wrongpass'] = 1 ; // mauvais mdp
-		}
 	}
 
 	public function reinit($step) // Gestion de la réinitialisation du mot de passe via question secrète
@@ -211,37 +255,4 @@ class Account extends Controller
 			require('view/reinitView.php');
 		}
 	}
-
-	public function profileUpdateUsername($new_username)// changement d'identifiant
-	{
-		$new_username = htmlspecialchars($new_username);
-		$work = updateUsername($new_username);
-		if(!$work)
-		{
-			$_SESSION['exist'] = 1 ;// erreur dans l'écriture
-		}
-		else
-		{
-			$_SESSION['username'] = $new_username;
-			$_SESSION['usernamechanged'] = 1 ; // écriture effectuée						
-		}
-	}
-
-	public function delPhoto($username) // Supprime la photo précédente (sauf si c'est celle par défaut)
-	{
-		$db = dbConnect();
-		$result = $db->prepare('SELECT photo FROM account WHERE username = :username');
-		$result->execute(array('username' => $username));
-		$data = $result->fetch();
-		$result->closeCursor();
-		$actual_filename = htmlspecialchars($data['photo']);
-		echo $actual_filename ;
-		if($actual_filename != 'default.png')
-		{
-			unlink(realpath('C:/xampp/htdocs/GBAF_MVC/public/images/uploads/' . $actual_filename));
-		}
-	}
 }
-
-
-

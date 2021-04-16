@@ -7,13 +7,47 @@ class Account extends Model
     protected $table = "account";
 
     // Réécriture nécessaire parce "id_user" dans la table account (nécessaire de renommer tous les "account" en "user" ou l'inverse pour factoriser correctement)
-    public function find(int $id)
+    public function find($var)
 	{
-		$result = $this->db->prepare("SELECT * FROM {$this->table} WHERE id_user = :id");
-		$result->execute(['id' => $id]);
+        if (is_numeric($var)) {
+            $q = "id_user";
+        }
+        else {
+            $q = "username";
+        }
+		$result = $this->db->prepare("SELECT * FROM {$this->table} WHERE {$q} = :var");
+		$result->execute(['var' => $var]);
 		$item = $result->fetch();
 		return $item ;
 	}
+
+    public function testPassword(int $userId,string $password) : bool // Vérifie le mot de passe actuel
+    {
+        $result = $this->db->prepare('SELECT password FROM account WHERE id_user = :userId');
+        $result->execute(array('userId' => $userId));
+        $content = $result->fetch();      
+        return password_verify($password,$content['password']);
+    }
+
+
+    public function updateUsername(string $newUsername,int $userId) : void // Change le nom d'utilisateur
+    {
+        $query = $this->db->prepare('UPDATE account SET username = :username WHERE id_user = :userId');
+        $query->execute(['username' => $newUsername, 'userId' => $userId]);
+    }
+
+    public function updatePassword(int $userId,string $password) : void // changement de mot de passe
+    {
+        $query = $this->db->prepare('UPDATE account SET password = :pass WHERE id_user = :userId');
+        $query->execute(['pass' => $password,'userId' => $userId]);
+    }
+
+    public function updatePhotoName(int $userId,string $fileName) : void // changement de photo
+    {
+        $query = $this->db->prepare('UPDATE account SET photo = :filename_ WHERE id_user = :userId');
+        $query->execute(['filename_' => $fileName,'userId' => $userId]);
+    }
+
 
     public function registerUser($last_name,$first_name,$username,$password,$question,$answer) // inscrit un utilisateur
     {
@@ -89,49 +123,6 @@ class Account extends Model
         return $test;
     }
 
-    public function reinitPass($username,$pass1) // changement de mot de passe
-    {
-        $pass = password_hash($pass1, PASSWORD_DEFAULT);
-        $query = $this->db->prepare('UPDATE account SET password = :pass WHERE username = :username');
-        $work = $query->execute(array('pass' => $pass,'username' => $username));
-        $query->closeCursor();
-        return $work;
-    }
-
-    public function testPassword($username,$password) // Vérifie le mot de passe actuel
-    {
-        $username = htmlspecialchars($username);
-        $password = htmlspecialchars($password);
-        $result = $this->db->prepare('SELECT username, password FROM account WHERE username = :username');
-        $result->execute(array('username' => $username));
-        $content = $result->fetch();
-        if($content)
-        {
-            $actual_password = htmlspecialchars($content['password']);
-            $testpass = password_verify($password,$actual_password);
-        }
-        else // ne devrait pas arriver
-        {
-            $testpass = false;
-        }
-        return $testpass;
-    }
-
-    public function updateUsername($new_username) // Change le nom d'utilisateur
-    {
-        $user = getUserId($_SESSION['username']);
-        $existing = existUsername($new_username);
-        if($existing)
-        {
-            $work = false ;
-        }
-        else
-        {
-            $query = $this->db->prepare('UPDATE account SET username = :username WHERE id_user = :user');
-            $work = $query->execute(array('username' => $new_username, 'user' => $user));
-        }
-        return $work;
-    }
 
     public function updateUserAccount($username,$filename) // Met à jour le lien de l'image de l'utilisateur
     {
