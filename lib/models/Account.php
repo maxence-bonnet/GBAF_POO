@@ -6,6 +6,15 @@ class Account extends Model
 {
     protected $table = "account";
 
+    // Réécriture nécessaire parce "id_user" dans la table account (nécessaire de renommer tous les "account" en "user" ou l'inverse pour factoriser correctement)
+    public function find(int $id)
+	{
+		$result = $this->db->prepare("SELECT * FROM {$this->table} WHERE id_user = :id");
+		$result->execute(['id' => $id]);
+		$item = $result->fetch();
+		return $item ;
+	}
+
     public function registerUser($last_name,$first_name,$username,$password,$question,$answer) // inscrit un utilisateur
     {
         $password = password_hash($_POST['pass1'],PASSWORD_DEFAULT);

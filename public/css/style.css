@@ -442,9 +442,17 @@ h1, h2, h3, h4
 	display:flex;
 	flex-direction:column;
 }
+
+.actual_profile_part2
+{
+	max-width:40%;
+	border-radius:100%;
+}
+
 .actual_profile_part2 > div > img
 {
 	margin:auto;
+	max-height:200px;
 	border-radius:100%;
 }
 .update_profile

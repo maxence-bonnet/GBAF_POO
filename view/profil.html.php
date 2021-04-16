@@ -1,9 +1,8 @@
-<?php $title = 'Mon profil' ; ?>
-
 <?php
-	$first_name = htmlspecialchars($_SESSION['prenom']);
-	$last_name = htmlspecialchars($_SESSION['nom']);
-	$photo = htmlspecialchars($_SESSION['photo']);
+	$firstName = $accountInfo['prenom'];
+	$lastName = $accountInfo['nom'];
+	$photo = $accountInfo['photo'];
+	$username = $accountInfo['username'];
 ?>
 
 <div class ="content profile_content">
@@ -12,8 +11,8 @@
 			<legend>Mon profil</legend>
 			<div class="actual_profile">
 				<div class="actual_profile_part1">								
-					<p>Mon nom (fixe) : <?= $last_name ?></p>
-					<p>Mon prénom (fixe) : <?= $first_name ?></p>
+					<p>Mon nom (fixe) : <?= $lastName ?></p>
+					<p>Mon prénom (fixe) : <?= $firstName ?></p>
 					<p>Mon identifiant : <?= $username ?></p>
 				</div>
 				<div class="actual_profile_part2">								

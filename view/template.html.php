@@ -15,15 +15,14 @@
 				<a href="index.php"><img src="./public/images/logos/gbaf.png" title="GBAF"alt="GBAF logo"/></a>
 			</div>
 			<?php
-				if(isset($_SESSION['username']) AND !empty($_SESSION['username'])) // session active
-				{ 
+				if (1) { 
 					?>
 					<div class="user_ref">
 						<div class="user_photo">
-							<a href="index.php?action=profil"><img src="public/images/uploads/<?= $_SESSION['photo'] ?>" alt="Ma photo de profil" title="Voir mon profil"/></a>
+							<a href="index.php?controller=account&amp;task=profil"><img src="public/images/uploads/Dujardin.jpg" alt="Ma photo de profil" title="Voir mon profil"/></a>
 						</div>
 						<div class="user_name">
-							<a href="index.php?action=profil" title="Voir mon profil"><p><?= $_SESSION['prenom'] . ' ' . $_SESSION['nom'] ; ?></p></a>
+							<a href="index.php?controller=account&amp;task=profil" title="Voir mon profil"><p><?= 'Jean Dujardin' ?></p></a>
 						</div>
 						<form class="deconnection_form" action="index.php?action=deconnexion" method="post"><input type="submit" value="deconnexion"/></form>				
 					</div>

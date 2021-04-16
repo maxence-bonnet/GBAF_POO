@@ -6,6 +6,17 @@ class Account extends Controller
 {
 	protected $modelName = \Models\Account::class;
 
+    public function profil()
+    {
+        $userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+
+        $accountInfo = $this->model->find($userId);
+
+        $pageTitle = "Profil de " . $accountInfo['nom'] . ' ' . $accountInfo['nom'];
+
+        \Renderer::render('profil', compact('pageTitle','accountInfo'));
+    }	
+
 	public function testRegistration($last_name,$first_name,$username,$pass1,$pass2,$question,$answer)
 	{
 		$existing = existUsername($username);
