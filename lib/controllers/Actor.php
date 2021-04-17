@@ -43,6 +43,10 @@ class Actor extends Controller
         }
 
         $userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+
+        $accountModel = new \Models\Account();
+
+        $accountInfo = $accountModel->find($userId);
         
         //titre de page
         $pageTitle = $actor['actor'];
@@ -85,6 +89,7 @@ class Actor extends Controller
         
         // Render
         \Renderer::render('acteur', compact('actor',
+                                        'accountInfo',
                                         'pageTitle',
                                         'actorId',
                                         'comments',

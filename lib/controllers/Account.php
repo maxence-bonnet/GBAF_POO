@@ -90,79 +90,60 @@ class Account extends Controller
 		\Http::redirect('index.php?controller=account&task=profil');
 	}
 
-	public function testRegistration($last_name,$first_name,$username,$pass1,$pass2,$question,$answer)
+	public function connexion()
 	{
-		$existing = existUsername($username);
-		
-		if($existing)
-		{
-			$error[] = 'exist';
-		}
-			if(strlen($username) < 3)
-		{
-			// username trop court
-			$error[] = 'short';
-		}
-		if(!preg_match("#(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\d)(?=.*[^A-Za-z\d])#",$pass1) OR strlen($pass1) < 8)
-		{
-			// format mot de passe invalide
-			$error[] = 'invalidpass';
-		}
-		if($pass1 != $pass2)
-		{
-			// les mots de passe ne correspondent pas
-			$error[] = 'passnotmatching';
-		}
-
-		if(isset($error))
-		{
-			foreach($error as $value => $key)
-			{
-				$_SESSION[$key] = 1;
+		if (isset($_POST['username']) && isset($_POST['password']) && !empty($_POST['username']) && !empty($_POST['password'])) {
+			$accountInfo = $this->model->find($_POST['username']);
+			if (password_verify($_POST['password'],$accountInfo['password'])) {
+				$_SESSION[$accountInfo['id_user']] = 1;
+				\Http::redirect('index.php?controller=acteur&task=accueil');
 			}
-			$work = false;
+			else {
+				$_SESSION['wrong'] = 1;
+				\Http::redirect('index.php?controller=account&task=connexion');
+			}
 		}
-		else
-		{
-			$work = true;
-		}
-		return $work;
+		else {
+			\Renderer::connectionPage();
+		}	
 	}
-	
-	public function inscription($post) // Inscription
+
+	public function inscription()
 	{
-		if(!empty($post['last_name']) AND
-		!empty($post['first_name']) AND 
-		!empty($post['username']) AND 
-		!empty($post['pass1']) AND 
-		!empty($post['pass2']) AND 
-		!empty($post['question']) AND 
-		!empty($post['answer'])) // Tous les champs sont remplis
-		{
-			foreach($post as $value => $key) // htmlspecialchars pour tout le monde
-			{
-				$post[$value] = htmlspecialchars($_POST[$value]);
+		if(!empty($_POST['last_name']) && !empty($_POST['first_name']) && !empty($_POST['username']) && !empty($_POST['pass1']) && !empty($_POST['pass2']) && !empty($_POST['question']) &&
+		!empty($_POST['answer'])) {
+			if ($this->model->find($_POST['username']) || strlen($_POST['username']) < 3) { // identifiant déjà existant ou trop court
+				$error[] = 'exist';
 			}
-			$work = testRegistration($post['last_name'],$post['first_name'],$post['username'],$post['pass1'],$post['pass2'],$post['question'],$post['answer']);
-			if($work)
-			{
-				$work = registerUser($post['last_name'],$post['first_name'],$post['username'],$post['pass1'],$post['question'],$post['answer']);
-				if(!$work)
+			if (!preg_match("#(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\d)(?=.*[^A-Za-z\d])#",$_POST['pass1']) OR strlen($_POST['pass1']) < 8) { // format incorrect
+				$error[] = 'invalidpass';
+			}
+			if ($_POST['pass1'] != $_POST['pass2']) { // les mots de passe ne correspondent pas
+				$error[] = 'passnotmatching';
+			}
+
+			if (isset($error)) {
+				foreach($error as $value => $key)
 				{
-					$_SESSION['unknown_error'] = 1 ;
+					$_SESSION[$key] = 1;
 				}
-				else
-				{
-					$_SESSION['success'] = 1 ;
-					header('Location: index.php?action=accueil');
-				}			
+				$test = false;
+			}
+			else {
+				$test = true;
+			}
+
+			if ($test) {
+				$password = password_hash($_POST['pass1'],PASSWORD_DEFAULT);
+				$this->model->registerUser($_POST['last_name'],$_POST['first_name'],$_POST['username'],$password,$_POST['question'],$_POST['answer']);
+				$_SESSION['success'] = 1;
+				\Http::redirect('index.php?controller=account&task=connexion');
 			}
 		}
-		else
-		{
+		elseif (!empty($_POST['last_name']) && !empty($_POST['first_name']) && !empty($_POST['username']) && !empty($_POST['pass1']) && !empty($_POST['pass2']) && !empty($_POST['question']) && !empty($_POST['answer'])) {
 			$_SESSION['missing_field'] = 1 ;
 		}
-		require('view/inscriptionView.php');
+		\Renderer::inscriptionPage();
 	}
 
 	public function reinit($step) // Gestion de la réinitialisation du mot de passe via question secrète
@@ -255,4 +236,11 @@ class Account extends Controller
 			require('view/reinitView.php');
 		}
 	}
+
+	function deconnection()
+	{
+		session_destroy();
+		\Http::redirect('index.php?controller=account&task=connexion');
+	}
+
 }

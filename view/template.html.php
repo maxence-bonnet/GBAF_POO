@@ -15,7 +15,7 @@
 				<a href="index.php"><img src="./public/images/logos/gbaf.png" title="GBAF"alt="GBAF logo"/></a>
 			</div>
 			<?php
-				if (1) { 
+				if (1 == 0) { 
 					?>
 					<div class="user_ref">
 						<div class="user_photo">
@@ -32,7 +32,7 @@
 				{
 					?>
 					<div class="inscription_link">
-						<a href="index.php?action=inscription">S'inscrire</a><p>/</p><a href="index.php?action=connexion">Se connecter</a>
+						<a href="index.php?controller=account&task=inscription">S'inscrire</a><p>/</p><a href="index.php?controller=account&task=connexion">Se connecter</a>
 					</div>
 					<?php
 				}

@@ -49,30 +49,3 @@ class Files extends Controller
 		$image($target,'public/images/uploads/' . $fileName);	
 	}
 }
-
-function profileUpdatePhoto($username,$photo)// changement de photo
-{
-	$size = $photo['size'];
-	$infos = pathinfo($photo['name']);
-	$upload_ext = $infos['extension'];
-	$test = testFile($upload_ext,$size);
-	if($test)
-	{
-		$result = addPhoto($username,$photo,$upload_ext);
-		if(!$result[0])
-		{
-			echo 'Erreur' . '<br/>';
-		}
-		else
-		{
-			$_SESSION['photo'] = $result[1];
-		}
-	}
-	else
-	{
-		$_SESSION['invalid_file'] = 1;
-	}
-}
-
-
-

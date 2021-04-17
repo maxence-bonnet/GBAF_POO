@@ -1,7 +1,7 @@
 <?php $title = 'Inscription' ; ?>
 
 <div class="content inscription_content">
-				<form class="inscription_form" action="index.php?action=inscription" method="post">
+				<form class="inscription_form" action="index.php?controller=account&amp;task=inscription" method="post">
 					<fieldset>
 						<legend>Inscription</legend>
 							<?php
@@ -24,13 +24,8 @@
 							<?php
 							if(isset($_SESSION['exist']))
 							{
-								    echo '<p style=color:red;>Ce nom d\'utilisateur existe déjà, veuillez en saisir un autre.</p>';
+								    echo '<p> style=color:red;>Ce nom d\'utilisateur existe déjà ou est trop court.</p>';
 								    unset($_SESSION['exist']);
-							}
-							if(isset($_SESSION['short']))
-							{
-								    echo '<p style=color:red;>Le nom d\'utilisateur saisi est trop court (minimum 3 caractères).</p>';
-								    unset($_SESSION['short']);
 							}
 							?>
 							<label for="pass1">Mot de passe <span class="lower_italic">(8 caractères, une majuscule, un chiffre et un caractère spécial au minimum)</span> :</label><input type="password" name="pass1" id="pass1" required/>

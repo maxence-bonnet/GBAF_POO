@@ -1,7 +1,5 @@
-<?php $title = 'Connexion' ; ?>
-
 <div class="content accueil_content"> 
-	<form class="connection_form" action="index.php?action=connexion&amp;try=1" method="post">
+	<form class="connection_form" action="index.php?controller=account&amp;task=connexion" method="post">
 		<fieldset>
 			<legend>Connexion</legend>
 				<?php

@@ -29,7 +29,6 @@ class Account extends Model
         return password_verify($password,$content['password']);
     }
 
-
     public function updateUsername(string $newUsername,int $userId) : void // Change le nom d'utilisateur
     {
         $query = $this->db->prepare('UPDATE account SET username = :username WHERE id_user = :userId');
@@ -48,7 +47,6 @@ class Account extends Model
         $query->execute(['filename_' => $fileName,'userId' => $userId]);
     }
 
-
     public function registerUser($last_name,$first_name,$username,$password,$question,$answer) // inscrit un utilisateur
     {
         $password = password_hash($_POST['pass1'],PASSWORD_DEFAULT);
@@ -58,22 +56,7 @@ class Account extends Model
         return $work;
     }
 
-    public function getUserId($username) // récupère l'identifiant utilisateur via username
-    {
-        $result = $this->db->prepare('SELECT id_user FROM account WHERE username = :username');
-        $result->execute(array('username' => $username));
-        $data = $result->fetch();
-        $user = $data['id_user'];
-        return $user;
-    }
 
-    public function existUsername($username) // vérifie l'existance d'un nom d'utilisateur
-    {
-        $result = $this->db->prepare('SELECT username FROM account WHERE username = :username');
-        $result->execute(array('username' => $username));
-        $existing = $result->fetch();
-        return $existing;
-    }
 
     public function getQuestion($username) // Récupère la question secrète de l'utilisateur actuel
     {
@@ -121,22 +104,6 @@ class Account extends Model
             }
         }	
         return $test;
-    }
-
-
-    public function updateUserAccount($username,$filename) // Met à jour le lien de l'image de l'utilisateur
-    {
-        $query = $this->db->prepare('UPDATE account SET photo = :filename WHERE username = :username');
-        $work = $query->execute(array(':filename' => $filename,'username' => $username));
-        if(!$work)
-        {
-            $work = false;
-        }
-        else
-        {
-            $work = true;
-        }
-        return $work;
     }
 }
 

@@ -6,10 +6,10 @@ class Application
     {
         $controllerName = "Actor";
         $task = "accueil";
-        $controllersCallArray = ['accout','actor','connection','contact','files','mentions','post','vote','account'];      
-        $tasksCallArray = ['accueil','acteur','contact','mentions','likeManage','addComment','delComment','profil','update'];
+        $controllersCallArray = ['account','actor','contact','files','mentions','post','vote'];      
+        $tasksCallArray = ['accueil','acteur','contact','mentions','likeManage','addComment','delComment','profil','update','connexion','inscription'];
 
-        if (!empty($_GET['controller']) && in_array($_GET['controller'],$controllersCallArray)) {                     
+        if (!empty($_GET['controller']) && in_array($_GET['controller'],$controllersCallArray)) {                    
             $controllerName = ucfirst($_GET['controller']);      
         }
 
