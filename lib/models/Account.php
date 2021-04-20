@@ -10,12 +10,12 @@ class Account extends Model
     public function find($var)
 	{
         if (is_numeric($var)) {
-            $q = "id_user";
+            $query = "id_user";
         }
         else {
-            $q = "username";
+            $query = "username";
         }
-		$result = $this->db->prepare("SELECT * FROM {$this->table} WHERE {$q} = :var");
+		$result = $this->db->prepare("SELECT * FROM {$this->table} WHERE {$query} = :var");
 		$result->execute(['var' => $var]);
 		$item = $result->fetch();
 		return $item ;
@@ -41,69 +41,16 @@ class Account extends Model
         $query->execute(['pass' => $password,'userId' => $userId]);
     }
 
-    public function updatePhotoName(int $userId,string $fileName) : void // changement de photo
+    public function updatePhotoName(int $userId,string $fileName) : void // changement de photo de profil
     {
         $query = $this->db->prepare('UPDATE account SET photo = :filename_ WHERE id_user = :userId');
         $query->execute(['filename_' => $fileName,'userId' => $userId]);
     }
 
-    public function registerUser($last_name,$first_name,$username,$password,$question,$answer) // inscrit un utilisateur
+    public function registerUser(string $lastname,string $firstname,string $username,string $password,string $question,string $answer) : void// inscrit un utilisateur
     {
-        $password = password_hash($_POST['pass1'],PASSWORD_DEFAULT);
-        $answer = password_hash($_POST['answer'],PASSWORD_DEFAULT);
         $query = $this->db->prepare('INSERT INTO account(nom, prenom, username, password, question, reponse) VALUES(:nom, :prenom, :username, :password, :question, :answer)');
-        $work = $query->execute(array('nom' => $last_name, 'prenom' => $first_name, 'username' => $username, 'password' => $password, 'question' => $question, 'answer' => $answer));
-        return $work;
-    }
-
-
-
-    public function getQuestion($username) // Récupère la question secrète de l'utilisateur actuel
-    {
-        $result = $this->db->prepare('SELECT question FROM account WHERE username = :username');
-        $result->execute(array('username' => $username));
-        $data = $result->fetch();
-        $result->closeCursor();
-        if(!$data) // ne devrait pas arriver
-        {
-            $question = '[...]';
-        }
-        else
-        {
-            $question = preg_replace("#(\?)#"," ",htmlspecialchars($data['question']));
-            $question = 'Votre question secrète : ' . $question . ' ?';
-        }
-        return $question;
-    }
-
-    public function testReinitAns($username,$answer) // Teste la validité de la réponse à la question secrète
-    {
-         $result = $this->db->prepare('SELECT reponse FROM account WHERE username = :username');
-        $result->execute(array('username' => $username));
-        $data = $result->fetch();
-        $result->closeCursor();	
-        if(!$data) // ne devrait pas arriver
-        {
-            $test = false;
-        }
-        else
-        {
-            $user_answer = htmlspecialchars($data['reponse']);
-            $test = password_verify($answer,$data['reponse']);
-            echo 'réponse : ' . $answer . '<br/>';
-            echo 'data[reponse] (hash) : ' . $data['reponse'] . '<br/>';
-            echo 'user_answer (hash) : ' . $user_answer . '<br/>';
-
-            if($test)
-            {
-                echo 'Oui <br/>' ;
-            }
-            else
-            {
-                echo 'Non <br/>' ;
-            }
-        }	
-        return $test;
+        $query->execute(array('nom' => $lastname, 'prenom' => $firstname, 'username' => $username, 'password' => $password, 'question' => $question, 'answer' => $answer));
     }
 }
 

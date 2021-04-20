@@ -15,7 +15,7 @@
 				<a href="index.php"><img src="./public/images/logos/gbaf.png" title="GBAF"alt="GBAF logo"/></a>
 			</div>
 			<?php
-				if (1 == 0) { 
+				if (isset($_SESSION['connected'])) { 
 					?>
 					<div class="user_ref">
 						<div class="user_photo">
@@ -24,7 +24,8 @@
 						<div class="user_name">
 							<a href="index.php?controller=account&amp;task=profil" title="Voir mon profil"><p><?= $accountInfo['prenom'] . ' ' . $accountInfo['nom'] ?></p></a>
 						</div>
-						<form class="deconnection_form" action="index.php?action=deconnexion" method="post"><input type="submit" value="deconnexion"/></form>				
+
+						<form class="deconnection_form" action="index.php?controller=account&amp;task=deconnexion" method="post"><input type="submit" value="deconnexion"/></form>				
 					</div>
 					<?php
 				}

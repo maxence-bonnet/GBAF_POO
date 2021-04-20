@@ -25,7 +25,7 @@ class Vote extends Controller
 
 		$userModel = new \Models\Account();
 
-		$userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+		$userId = $_SESSION['connected'];
 
 		$voteCurrent = $this->model->checkVote($actorId,$userId);
 
@@ -48,9 +48,8 @@ class Vote extends Controller
 			// mise à jour de la mention (permutation)
 			$this->model->updateVote($actorId,$userId,$voteRequest);
 		}
-		\Http::redirect('index.php?controller=acteur&task=acteur&id=' . $actorId);
-	}
-	
+		\Http::redirect('index.php?controller=actor&task=acteur&id=' . $actorId);
+	}	
 }
 
 

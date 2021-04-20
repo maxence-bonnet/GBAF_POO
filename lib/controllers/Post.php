@@ -19,7 +19,7 @@ class Post extends Controller
             }
         }
 
-		$userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+		$userId = $_SESSION['connected'];
 
 		$comment = $_POST['new_comment']; // AJOUTER + DE VERIFICATIONS
 
@@ -37,11 +37,11 @@ class Post extends Controller
 				// $_SESSION['posted'] = true;				
 			}		
 		}
-		\Http::redirect('index.php?controller=acteur&task=acteur&id=' . $actorId);
+		\Http::redirect('index.php?controller=actor&task=acteur&id=' . $actorId);
 	}
 
 	public function delComment()
-	{
+	{	
 		// Vérification à globaliser à chaque fois qu'on aura besoin d'un id acteur
 		if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
 			$actorId = $_GET['id'];
@@ -53,7 +53,7 @@ class Post extends Controller
 			}
 		}
 
-		$userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+		$userId = $_SESSION['connected'];
 
 		$existingUserComment = $this->model->existUserComment($actorId,$userId);
 
@@ -67,10 +67,6 @@ class Post extends Controller
 				// $_SESSION['deleted_post'] = true;			
 			}	
 		}
-		\Http::redirect('index.php?controller=acteur&task=acteur&id=' . $actorId);
+		\Http::redirect('index.php?controller=actor&task=acteur&id=' . $actorId);
 	}
 }
-
-
-
-

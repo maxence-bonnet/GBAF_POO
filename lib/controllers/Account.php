@@ -6,9 +6,93 @@ class Account extends Controller
 {
 	protected $modelName = \Models\Account::class;
 
+	public static function isConnected()
+	{
+		return isset($_SESSION['connected']);
+	}
+
+	public function inscription()
+	{
+		if (Account::isConnected()) {
+			\Http::redirect('index.php?controller=actor&task=accueil');
+		}
+
+		if(!empty($_POST['last_name']) && !empty($_POST['first_name']) && !empty($_POST['username']) && !empty($_POST['pass1']) && !empty($_POST['pass2']) && !empty($_POST['question']) &&
+		!empty($_POST['answer'])) {
+			if ($this->model->find($_POST['username']) || !preg_match("#^[a-z]{3,}$#i",$_POST['username'])) { // identifiant déjà existant ou trop court / format incorrect
+				$error[] = 'exist';
+			}
+			if (!preg_match("#(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\d)(?=.*[^A-Za-z\d])#",$_POST['pass1']) OR strlen($_POST['pass1']) < 8) { // format incorrect
+				$error[] = 'invalidpass';
+			}
+			if ($_POST['pass1'] != $_POST['pass2']) { // les mots de passe ne correspondent pas
+				$error[] = 'passnotmatching';
+			}
+
+			if (isset($error)) {
+				foreach($error as $value => $key)
+				{
+					$_SESSION[$key] = 1;
+				}
+				$test = false;
+			}
+			else {
+				$test = true;
+			}
+
+			if ($test) {
+				$password = password_hash($_POST['pass1'],PASSWORD_DEFAULT);
+				$answer = password_hash($_POST['answer'],PASSWORD_DEFAULT);
+				$this->model->registerUser($_POST['last_name'],$_POST['first_name'],$_POST['username'],$password,$_POST['question'],$answer);
+				$_SESSION['success'] = 1;
+				\Http::redirect('index.php?controller=account&task=connexion');
+			}
+		}
+		elseif (!empty($_POST['last_name']) && !empty($_POST['first_name']) && !empty($_POST['username']) && !empty($_POST['pass1']) && !empty($_POST['pass2']) && !empty($_POST['question']) && !empty($_POST['answer'])) {
+			$_SESSION['missing_field'] = 1 ;
+		}
+		$pageTitle = "Inscription";
+		\Renderer::render('inscription', compact('pageTitle'));
+	}
+
+	public function connexion()
+	{
+		if (Account::isConnected()) {
+			\Http::redirect('index.php?controller=actor&task=accueil');
+		}
+
+		if (isset($_POST['username']) && isset($_POST['password']) && !empty($_POST['username']) && !empty($_POST['password'])) {
+			$accountInfo = $this->model->find($_POST['username']);
+			if (password_verify($_POST['password'],$accountInfo['password'])) {			
+				$_SESSION['connected'] = $accountInfo['id_user'];
+				\Http::redirect('index.php?controller=actor&task=accueil');
+			}
+			else {
+				$_SESSION['wrong'] = 1;
+				\Http::redirect('index.php?controller=account&task=connexion');
+			}
+		}
+		else {
+			$pageTitle = "Connexion";
+			\Renderer::render('connexion', compact('pageTitle'));
+		}	
+	}
+
+	public function deconnexion()
+	{
+		if (isset($_SESSION['connected'])) {
+			unset($_SESSION['connected']);
+		}
+		\Http::redirect('index.php?controller=account&task=connexion');
+	}
+
     public function profil()
     {
-        $userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+		if (!Account::isConnected()) {
+			\Http::redirect('index.php?controller=account&task=connexion');
+		}
+
+        $userId = $_SESSION['connected'];
 
         $accountInfo = $this->model->find($userId);
 
@@ -19,7 +103,11 @@ class Account extends Controller
 
 	public function update()
 	{
-		$userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+		if (!Account::isConnected()) {
+			\Http::redirect('index.php?controller=account&task=connexion');
+		}
+
+		$userId = $_SESSION['connected'];
 
 		if (isset($_POST['username']) && !empty($_POST['username'])) {
 			if (preg_match("#^[a-z]{3,}$#i",$_POST['username'])) {
@@ -90,157 +178,106 @@ class Account extends Controller
 		\Http::redirect('index.php?controller=account&task=profil');
 	}
 
-	public function connexion()
+	public function reinit() // Gestion de la réinitialisation du mot de passe via question secrète
 	{
-		if (isset($_POST['username']) && isset($_POST['password']) && !empty($_POST['username']) && !empty($_POST['password'])) {
-			$accountInfo = $this->model->find($_POST['username']);
-			if (password_verify($_POST['password'],$accountInfo['password'])) {
-				$_SESSION[$accountInfo['id_user']] = 1;
-				\Http::redirect('index.php?controller=acteur&task=accueil');
-			}
-			else {
-				$_SESSION['wrong'] = 1;
-				\Http::redirect('index.php?controller=account&task=connexion');
-			}
+		if (Account::isConnected()) {
+			\Http::redirect('index.php?controller=actor&task=accueil');
 		}
-		else {
-			\Renderer::connectionPage();
-		}	
-	}
 
-	public function inscription()
-	{
-		if(!empty($_POST['last_name']) && !empty($_POST['first_name']) && !empty($_POST['username']) && !empty($_POST['pass1']) && !empty($_POST['pass2']) && !empty($_POST['question']) &&
-		!empty($_POST['answer'])) {
-			if ($this->model->find($_POST['username']) || strlen($_POST['username']) < 3) { // identifiant déjà existant ou trop court
-				$error[] = 'exist';
-			}
-			if (!preg_match("#(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\d)(?=.*[^A-Za-z\d])#",$_POST['pass1']) OR strlen($_POST['pass1']) < 8) { // format incorrect
-				$error[] = 'invalidpass';
-			}
-			if ($_POST['pass1'] != $_POST['pass2']) { // les mots de passe ne correspondent pas
-				$error[] = 'passnotmatching';
-			}
-
-			if (isset($error)) {
-				foreach($error as $value => $key)
-				{
-					$_SESSION[$key] = 1;
-				}
-				$test = false;
-			}
-			else {
-				$test = true;
-			}
-
-			if ($test) {
-				$password = password_hash($_POST['pass1'],PASSWORD_DEFAULT);
-				$this->model->registerUser($_POST['last_name'],$_POST['first_name'],$_POST['username'],$password,$_POST['question'],$_POST['answer']);
-				$_SESSION['success'] = 1;
-				\Http::redirect('index.php?controller=account&task=connexion');
-			}
+		$allowedSteps = [1,2,3];
+		if (!isset($_GET['step']) || !in_array($_GET['step'],$allowedSteps)) {
+			$step = 1;
+			$pageTitle = "Réinitialisation du mot de passe (1)";
+			\Renderer::render('reinit', compact('pageTitle','step'));
 		}
-		elseif (!empty($_POST['last_name']) && !empty($_POST['first_name']) && !empty($_POST['username']) && !empty($_POST['pass1']) && !empty($_POST['pass2']) && !empty($_POST['question']) && !empty($_POST['answer'])) {
-			$_SESSION['missing_field'] = 1 ;
-		}
-		\Renderer::inscriptionPage();
-	}
 
-	public function reinit($step) // Gestion de la réinitialisation du mot de passe via question secrète
-	{
-		if($step == 1)
-		{
-			$content = getReinitContent(1);
-			require('view/reinitView.php');
+		$step = $_GET['step'];
+		if($step == 1) {
+			if (isset($_SESSION['usertemp'])) {
+				unset($_SESSION['usertemp']);
+			}
+			$pageTitle = "Réinitialisation du mot de passe (1)";
+			\Renderer::render('reinit', compact('pageTitle','step'));
 		}
-		elseif($step == 3)
-		{
-			if(isset($_POST['answer']) AND isset($_POST['pass1']) AND isset($_POST['pass2']) AND isset($_SESSION['usertemp']))
+		elseif($step == 3) {
+			if(isset($_POST['answer']) && isset($_POST['pass1']) && isset($_POST['pass2']) && isset($_SESSION['usertemp']))
 			{
-				$username = $_SESSION['usertemp'];
-				$answer = htmlspecialchars($_POST['answer']);		
-				$test = testReinitAns($username,$answer);
-				if(!$test)
-				{
+				$accountInfo = $this->model->find($_SESSION['usertemp']);
+				
+				$answer = $_POST['answer'];
+
+				if (!password_verify($_POST['answer'],$accountInfo['reponse'])) {	
 					$_SESSION['invalid_answer'] = 1 ;
-					header('Location: index.php?action=reinit&fgt=2');
+					\Http::redirect('index.php?controller=account&task=reinit&step=2');
 					// mauvaise réponse à la question secrète
 				}
-				else
-				{
-					$pass1 = htmlspecialchars($_POST['pass1']);
-					$pass2 = htmlspecialchars($_POST['pass2']);
-					$test = testReinitPass($pass1,$pass2);
-					if(!$test)
-					{
+				else {
+					$error = false;
+					if (!preg_match("#(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\d)(?=.*[^A-Za-z\d])#",$_POST['pass1']) || strlen($_POST['pass1']) < 8) { // format incorrect
+						$error = 1;
 						$_SESSION['invalid_pass_format'] = 1 ;
-						header('Location: index.php?action=reinit&fgt=2');
-						// mauvais format de mot de passe (mais bonne réponse)
 					}
-					else
-					{
-						$work = reinitPass($username,$pass1);
-						if(!$work)
-						{
-							$_SESSION['update_error'] = 1 ;
-							header('Location: index.php?action=reinit&fgt=2');
-							// erreur pendant l'écriture
-						}
-						else
-						{
-							unset($_SESSION['usertemp']);
-							$_SESSION['passchanged'] = 1 ;
-							header('Location: index.php?action=connexion');
-							// succès dans la réinitialisation -> retour à la page de connexion
-						}
+					if ($_POST['pass1'] != $_POST['pass2']) { // les mots de passe ne correspondent pas
+						$error = 1;
+						$_SESSION['pass_not_matching'] = 1 ;
+					}
+					if ($error) {
+						\Http::redirect('index.php?controller=account&task=reinit&step=2');
+					}
+					else {
+						$newPassword = password_hash($_POST['pass1'],PASSWORD_DEFAULT);
+
+						$this->model->updatePassword($accountInfo['id_user'],$newPassword);
+
+						unset($_SESSION['usertemp']);
+
+						$_SESSION['passchanged'] = 1 ;
+
+						\Http::redirect('index.php?controller=account&task=connexion');
+
+						// succès dans la réinitialisation -> retour à la page de connexion
 					}
 				}
 			}
-			else
-			{
+			elseif (isset($_SESSION['usertemp'])) {
 				$_SESSION['missing_field'] = 1 ;
-				header('Location: index.php?action=reinit&amp;fgt=2');
-				// manque certains champs
+				\Http::redirect('index.php?controller=account&task=reinit&step=2');
+			}
+			else {
+				\Http::redirect('index.php?controller=account&task=reinit&step=1');
 			}
 		}
-		elseif($step == 2 AND isset($_POST['username']) OR isset($_SESSION['usertemp']))
-		{
-			if(isset($_POST['username']))
-			{
-				$username = htmlspecialchars($_POST['username']);	
+		elseif($step == 2) {
+			if (isset($_POST['username'])) {
+				$username = $_POST['username'];	
 			}
-			else // cas où il y a eu un précédent retour d'erreur
-			{
-				$username = htmlspecialchars($_SESSION['usertemp']);
+			elseif (isset($_SESSION['usertemp'])) { // cas où il y a eu un retour d'erreur à l'étape qui suit
+				$username = $_SESSION['usertemp'];
+			}
+			else {
+				\Http::redirect('index.php?controller=account&task=reinit&step=1');
 			}
 
-			$existing = existUsername($username);
+			$accountInfo = $this->model->find($username);
 
-			if(!$existing)
-			{
+			if (!$accountInfo) { // Identifiant inexistant
 				$_SESSION['invalid_user'] = 1 ;
-				header('Location: index.php?action=reinit&amp;fgt=1');
-				// utilisateur inexistant
+				$step = 1;
+				$pageTitle = "Réinitialisation du mot de passe (1)";
+				\Renderer::render('reinit', compact('pageTitle','step'));
 			}
-			else
-			{
-				$_SESSION['usertemp'] = $username;
-				$question = getQuestion($username);
-				$content = getReinitContent(2,$question);
-				require('view/reinitView.php');
+			else {
+				$_SESSION['usertemp'] = $accountInfo['id_user'];
+				$question = $accountInfo['question'];
+				$step = 2;
+				$pageTitle = "Réinitialisation du mot de passe (2)";
+				\Renderer::render('reinit', compact('pageTitle','step','question'));
 			}			
 		}		
-		else
-		{
-			$step = 1;
-			require('view/reinitView.php');
+		else {
+			$step == 1;
+			$pageTitle = "Réinitialisation du mot de passe (1)";
+			\Renderer::render('reinit', compact('pageTitle','step'));
 		}
 	}
-
-	function deconnection()
-	{
-		session_destroy();
-		\Http::redirect('index.php?controller=account&task=connexion');
-	}
-
 }

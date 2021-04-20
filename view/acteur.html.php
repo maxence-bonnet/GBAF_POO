@@ -15,7 +15,7 @@
 		<?php
 			if (!$existingUserComment) { // pas encore de commentaire de l'utilisateur pour cet acteur -> on propose l'ajout de commentaire
 				?>
-					<a href="index.php?controller=acteur&amp;task=acteur&amp;id=<?= $actorId ?>&amp;add=1#new_comment">Ajouter un commentaire public</a>
+					<a href="index.php?controller=actor&amp;task=acteur&amp;id=<?= $actorId ?>&amp;add=1#new_comment">Ajouter un commentaire public</a>
 				<?php
 			}
 			else { // déjà commenté cet acteur -> Mention + lien pour supprimer le commentaire existant

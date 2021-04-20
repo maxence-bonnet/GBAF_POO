@@ -6,6 +6,21 @@ class Files extends Controller
 {
 	protected $modelName = \Models\Files::class;
 
+	public static function imgtoMini($fileName,$fileExtension) // jpeg ou png vers miniature
+	{
+		// fonction à nom dynamique
+		$imagecreatefrom = 'imagecreatefrom' . $fileExtension;
+		$image = 'image' . $fileExtension;
+		$source = $imagecreatefrom('public/images/uploads/' . $fileName);
+		$target = imagecreatetruecolor(150, 150);
+		$source_width= imagesx($source);
+		$source_height = imagesy($source);
+		$target_width = imagesx($target);
+		$target_height = imagesy($target);
+		imagecopyresampled($target, $source, 0, 0, 0, 0, $target_width, $target_height, $source_width, $source_height);
+		$image($target,'public/images/uploads/' . $fileName);	
+	}
+
 	public function testFile($uploadExtension,$size) // Vérifie les caractéristiques du fichier reçu
 	{
 		$allowedExtensions = array('jpg', 'jpeg', 'png');
@@ -32,20 +47,5 @@ class Files extends Controller
 	public function delPhoto($fileName)
 	{
 		unlink(realpath('C:/xampp/htdocs/GBAF_POO/public/images/uploads/' . $fileName));
-	}
-
-	public static function imgtoMini($fileName,$fileExtension) // jpeg ou png vers miniature
-	{
-		// fonction à nom dynamique
-		$imagecreatefrom = 'imagecreatefrom' . $fileExtension;
-		$image = 'image' . $fileExtension;
-		$source = $imagecreatefrom('public/images/uploads/' . $fileName);
-		$target = imagecreatetruecolor(150, 150);
-		$source_width= imagesx($source);
-		$source_height = imagesy($source);
-		$target_width = imagesx($target);
-		$target_height = imagesy($target);
-		imagecopyresampled($target, $source, 0, 0, 0, 0, $target_width, $target_height, $source_width, $source_height);
-		$image($target,'public/images/uploads/' . $fileName);	
 	}
 }

@@ -39,7 +39,7 @@
 					    			?>... </p><p>Vers le site de <a class="actor_external_link" href="#"><?= $actor['actor']?></a></p>
 					    		</div>
 					    	</div>
-					    	<a class="actor_read_more" href="index.php?controller=acteur&amp;task=acteur&amp;id=<?= $actor['id_actor']; ?>">Lire la suite</a>
+					    	<a class="actor_read_more" href="index.php?controller=actor&amp;task=acteur&amp;id=<?= $actor['id_actor']; ?>">Lire la suite</a>
 				    </div>
 				<?php
 			}

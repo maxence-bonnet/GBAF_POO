@@ -10,7 +10,7 @@ class Actor extends Controller
     {
         $actorsInfo = $this->model->findAll();
        
-        $userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+        $userId = $_SESSION['connected'];
 
         $accountModel = new \Models\Account();
 
@@ -42,7 +42,7 @@ class Actor extends Controller
             \Http::redirect('index.php');
         }
 
-        $userId = '2'; // Par défaut -> Jean Dujardin comme utilisateur avant de mettre le système de connexion
+        $userId = $_SESSION['connected'];
 
         $accountModel = new \Models\Account();
 
@@ -103,5 +103,4 @@ class Actor extends Controller
         ));
 
     }
-    
 }
